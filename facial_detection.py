@@ -1,6 +1,7 @@
 from pathlib import Path
 import face_recognition
 import pickle
+from collections import Counter
 
 DEFAULT_ENCODINGS_PATH = Path("output/encodings.pkl")
 
@@ -52,3 +53,39 @@ def recognize_faces(
         loaded_encodings = pickle.load(f)
 
     input_image = face_recognition.load_image_file(image_location)
+
+    # Find all the faces in the input image
+    input_face_locations = face_recognition.face_locations(
+        input_image, model=model
+    )
+    input_face_encodings = face_recognition.face_encodings(
+        input_image, input_face_locations
+    )
+
+    # Iterate over each face found in the input image
+    for bounding_box, unknown_encoding in zip(
+        input_face_locations, input_face_encodings
+    ):
+        # See if the face is a match for the known face(s)
+        name = _recognize_face(unknown_encoding, loaded_encodings)
+        if not name:
+            name = "Unknown"
+        print(name, bounding_box)
+
+def _recognize_face(unknown_encoding, loaded_encodings):
+    # See if the face is a match for the known face(s)
+    boolean_matches = face_recognition.compare_faces(
+        loaded_encodings["encodings"], unknown_encoding
+    )
+    # If a match was found in known_face_encodings, just use the first one.
+    votes = Counter(
+        name
+        for match, name in zip(boolean_matches, loaded_encodings["names"])
+        if match
+    )
+    # Get the most common name
+    if votes:
+        return votes.most_common(1)[0][0]
+    
+
+recognize_faces("unknown.jpg")
