@@ -2,6 +2,7 @@ from pathlib import Path
 import face_recognition
 import pickle
 from collections import Counter
+from PIL import Image, ImageDraw
 
 DEFAULT_ENCODINGS_PATH = Path("output/encodings.pkl")
 
@@ -62,6 +63,12 @@ def recognize_faces(
         input_image, input_face_locations
     )
 
+    # Create a PIL image to draw on
+    pillow_image = Image.fromarray(input_image)
+
+    # Create a Pillow ImageDraw Draw instance to draw with
+    draw = ImageDraw.Draw(pillow_image)
+
     # Iterate over each face found in the input image
     for bounding_box, unknown_encoding in zip(
         input_face_locations, input_face_encodings
@@ -71,6 +78,10 @@ def recognize_faces(
         if not name:
             name = "Unknown"
         print(name, bounding_box)
+        _display_face(draw, bounding_box, name)
+
+    del draw
+    pillow_image.show()
 
 def _recognize_face(unknown_encoding, loaded_encodings):
     # See if the face is a match for the known face(s)
@@ -88,4 +99,28 @@ def _recognize_face(unknown_encoding, loaded_encodings):
         return votes.most_common(1)[0][0]
     
 
-recognize_faces("unknown.jpg")
+
+def _display_face(draw, bounding_box, name):
+    top, right, bottom, left = bounding_box
+    draw.rectangle(((left, top), (right, bottom)), outline="blue")
+    text_left, text_top, text_right, text_bottom = draw.textbbox(
+        (left, bottom), name
+    )
+    draw.rectangle(
+        ((text_left, text_top), (text_right, text_bottom)),
+        fill="blue",
+        outline="blue",
+    )
+    draw.text(
+        (text_left, text_top),
+        name,
+        fill="white",
+    )
+
+
+def validate():
+
+    for image in Path("validation").rglob("*"):
+        if image.name == '.DS_Store':
+            continue
+        recognize_faces(str(image.absolute()))
