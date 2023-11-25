@@ -4,6 +4,7 @@ import pickle
 from collections import Counter
 from PIL import Image, ImageDraw
 import argparse
+from moviepy.editor import *
 
 DEFAULT_ENCODINGS_PATH = Path("output/encodings.pkl")
 
@@ -41,8 +42,7 @@ def encode_known_faces(
     with encodings_location.open("wb") as f:
         pickle.dump(name_encodings, f)
 
-# RUN ONLY ONCE
-# encode_known_faces()
+#encode_known_faces()
 
 def recognize_faces(
     image_location: str,
@@ -54,35 +54,41 @@ def recognize_faces(
     with encodings_location.open(mode="rb") as f:
         loaded_encodings = pickle.load(f)
 
-    input_image = face_recognition.load_image_file(image_location)
+    clip = VideoFileClip(image_location)
+    
+    for i in range(5):
+        frame = "frame" + str(i) + ".jpg"
+        clip.save_frame(frame, t = i)
 
-    # Find all the faces in the input image
-    input_face_locations = face_recognition.face_locations(
-        input_image, model=model
-    )
-    input_face_encodings = face_recognition.face_encodings(
-        input_image, input_face_locations
-    )
+        input_image = face_recognition.load_image_file(frame)
 
-    # Create a PIL image to draw on
-    pillow_image = Image.fromarray(input_image)
+        # Find all the faces in the input image
+        input_face_locations = face_recognition.face_locations(
+            input_image, model=model
+        )
+        input_face_encodings = face_recognition.face_encodings(
+            input_image, input_face_locations
+        )
 
-    # Create a Pillow ImageDraw Draw instance to draw with
-    draw = ImageDraw.Draw(pillow_image)
+        # Create a PIL image to draw on
+        pillow_image = Image.fromarray(input_image)
 
-    # Iterate over each face found in the input image
-    for bounding_box, unknown_encoding in zip(
-        input_face_locations, input_face_encodings
-    ):
-        # See if the face is a match for the known face(s)
-        name = _recognize_face(unknown_encoding, loaded_encodings)
-        if not name:
-            name = "Unknown"
-        print(name, bounding_box)
-        _display_face(draw, bounding_box, name)
+        # Create a Pillow ImageDraw Draw instance to draw with
+        draw = ImageDraw.Draw(pillow_image)
 
-    del draw
-    pillow_image.show()
+        # Iterate over each face found in the input image
+        for bounding_box, unknown_encoding in zip(
+            input_face_locations, input_face_encodings
+        ):
+            # See if the face is a match for the known face(s)
+            name = _recognize_face(unknown_encoding, loaded_encodings)
+            if not name:
+                name = "Unknown"
+            print(name, bounding_box)
+            _display_face(draw, bounding_box, name)
+
+        del draw
+        pillow_image.show()
 
 def _recognize_face(unknown_encoding, loaded_encodings):
     # See if the face is a match for the known face(s)
@@ -103,14 +109,14 @@ def _recognize_face(unknown_encoding, loaded_encodings):
 
 def _display_face(draw, bounding_box, name):
     top, right, bottom, left = bounding_box
-    draw.rectangle(((left, top), (right, bottom)), outline="blue")
+    draw.rectangle(((left, top), (right, bottom)), outline="green")
     text_left, text_top, text_right, text_bottom = draw.textbbox(
         (left, bottom), name
     )
     draw.rectangle(
         ((text_left, text_top), (text_right, text_bottom)),
-        fill="blue",
-        outline="blue",
+        fill="green",
+        outline="green",
     )
     draw.text(
         (text_left, text_top),
@@ -125,6 +131,8 @@ def validate():
         if image.name == '.DS_Store':
             continue
         recognize_faces(str(image.absolute()))
+
+#validate()
 
 parser = argparse.ArgumentParser(prog='self.checkout', description='Draws bounding box outline around face(s) in image')
 
