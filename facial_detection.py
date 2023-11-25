@@ -3,6 +3,7 @@ import face_recognition
 import pickle
 from collections import Counter
 from PIL import Image, ImageDraw
+import argparse
 
 DEFAULT_ENCODINGS_PATH = Path("output/encodings.pkl")
 
@@ -124,3 +125,11 @@ def validate():
         if image.name == '.DS_Store':
             continue
         recognize_faces(str(image.absolute()))
+
+parser = argparse.ArgumentParser(prog='self.checkout', description='Draws bounding box outline around face(s) in image')
+
+parser.add_argument('filename')
+
+args = parser.parse_args()
+
+recognize_faces(args.filename)
