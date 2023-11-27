@@ -5,6 +5,7 @@ from collections import Counter
 from PIL import Image, ImageDraw
 import argparse
 from moviepy.editor import *
+import image_augmentation
 
 DEFAULT_ENCODINGS_PATH = Path("output/encodings.pkl")
 
