@@ -19,7 +19,7 @@ def augment_image(input_image):
     # Generate 20 augmented images and save to the directory
     i = 0
     for batch in datagen.flow(input_image, batch_size=16,
-                                save_to_dir='augmented', save_prefix='olivia', save_format='jpeg'):
+                                save_to_dir='training/sirus_salari', save_prefix='sirus_salari', save_format='jpeg'):
             i += 1
             if i > 20:
                 break
