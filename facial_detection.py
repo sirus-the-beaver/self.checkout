@@ -12,6 +12,18 @@ DEFAULT_ENCODINGS_PATH = Path("output/encodings.pkl")
 def encode_known_faces(
     model: str = "hog", encodings_location: Path = DEFAULT_ENCODINGS_PATH
 ) -> None:
+    """
+    This function handles the encoding of known faces. It takes in a model and encodings_location
+    and then encodes the faces and saves them to the encodings_location.
+
+    :param model: The model to use for encoding the faces. Can be either "hog" or "cnn".
+    :param encodings_location: The location to save the encodings to.
+    :return: None
+    """
+    
+    # Augment ID image to get more training data
+    image_augmentation.augment_image("training/sirus_salari/IMG_6089 2.jpg")
+
     # hog is faster but less accurate (best for CPU)
     # cnn is slower but more accurate (best for GPU)pip3 install face_recognition
     
@@ -50,6 +62,15 @@ def recognize_faces(
     model: str = "hog",
     encodings_location: Path = DEFAULT_ENCODINGS_PATH,
 ) -> None:
+    """
+    This function handles the recognition of faces. It takes in an image_location, model and encodings_location
+    and then encodes the faces and saves them to the encodings_location.
+
+    :param image_location: The location of the image to recognize faces in.
+    :param model: The model to use for encoding the faces. Can be either "hog" or "cnn".
+    :param encodings_location: The location to save the encodings to.
+    :return: None
+    """
     
     # Load the face encodings
     with encodings_location.open(mode="rb") as f:
@@ -96,6 +117,15 @@ def _recognize_face(unknown_encoding, loaded_encodings):
     boolean_matches = face_recognition.compare_faces(
         loaded_encodings["encodings"], unknown_encoding
     )
+    """
+    This private helper function handles the recognition of faces. It takes in an image_location, model and encodings_location
+    and then encodes the faces and saves them to the encodings_location.
+
+    :param unknown_encoding: The encoding of the face to recognize.
+    :param loaded_encodings: The encodings of the known faces.
+    :return: The name of the face if it is recognized, otherwise None.
+    """
+
     # If a match was found in known_face_encodings, just use the first one.
     votes = Counter(
         name
@@ -114,6 +144,16 @@ def _display_face(draw, bounding_box, name):
     text_left, text_top, text_right, text_bottom = draw.textbbox(
         (left, bottom), name
     )
+    """
+    This private helper function handles the display of faces. It takes in a draw instance, bounding_box and name
+    and then draws a bounding box and name on the image.
+
+    :param draw: The draw instance to draw with.
+    :param bounding_box: The bounding box of the face.
+    :param name: The name of the face.
+    :return: None
+    """
+
     draw.rectangle(
         ((text_left, text_top), (text_right, text_bottom)),
         fill="green",
@@ -127,6 +167,11 @@ def _display_face(draw, bounding_box, name):
 
 
 def validate():
+    """
+    This function handles the validation of the model.
+
+    :return: None
+    """
 
     for image in Path("validation").rglob("*"):
         if image.name == '.DS_Store':
