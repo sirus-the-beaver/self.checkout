@@ -2,7 +2,7 @@
 
 This project is a self-checkout system designed to streamline the shopping experience.
 
-More specifically, the end-goal is to have a program that will allow for in-store shoppers to puruchase
+The end-goal is to have a program that will allow for in-store shoppers to puruchase
 alcoholic beverages from the self-checkout registers.
 
 Currently, you're only allowed to purchase alcoholic beverages at employee-operated registers.
@@ -13,16 +13,20 @@ The process usually goes as follows:
 - Emplyee scans customer's ID to verify it's a legitimate ID
 - Employee looks at the ID photo and matches the photo to the customer
 
-This project aims to have AI handle step 3, so that the customer can handle steps 1 and 2 if they wish to do so.
+This project aims to have AI handle step 3, so that the customer can handle steps 1 and 2 if they wish to do so at the self checkout register.
 
-More specifically, this will be accomplished by having the ML model train on just 1 original image (the ID photo).
+This will be accomplished by having the ML model train on just 1 original image (the ID photo).
 
-The intent is that this original photo will be aquired through hardware such as a photo scanner.
+The process goes as follows:
 
-Next, the program will generate new augmented images so that the model has more images to train with.
-
-Finally, the program will validate the customer by taking 5 frames from video footage at the self-checkout station 
-as validation images.
+- Customer scans the alcoholic beverage barcode
+- Customer scans their ID's barcode so the computer verifies it's legitimate
+- Customer holds their ID up to a camera
+- This program will capture a picture of their ID as well as a short video clip of the customer
+- The program will then send the ID image down an image augmentation pipeline to generate an artificially larger training dataset
+- Next, the program will train on the original ID image and the augmented images using a CNN model (currently using HOG model, but CNN will be used in practice)
+- Then, the program will try to validate the customer by testing image frames from the video recorded of the customer earlier
+- If the model determines that the face in the video frames is the same as the ID image, then the customer is fully verified as able to purchase the alcohol and they can continue scanning items
 
 ## Installation
 
@@ -38,13 +42,6 @@ cd self.checkout
 python -m venv venv
 source venv/bin/activate
 python -m pip install -r requirements.txt
-```
-
-## Usage
-
-Run from the terminal:
-```bash
-python facial_detection.py /path/to/video
 ```
 
 ## Contributing
