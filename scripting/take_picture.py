@@ -5,33 +5,19 @@ This script is used to automate the processs of taking a picture of the customer
 
 import os
 from picamera import PiCamera
-import keyboard
+from time import sleep
 
-# Set the directory to save the picture to
-save_dir = "../training/person"
-
-# Set the camera object
+save_dir = "./training/person/"
 camera = PiCamera()
-
-# Set the camera resolution
 camera.resolution = (1024, 768)
 
-# Set the camera rotation
-camera.rotation = 180
-
-# Capture the image
 def capture_image():
     image_name = "id_image.jpg"
     image_path = os.path.join(save_dir, image_name)
-    # Camera warm-up time
-    sleep(2)
+
+    camera.start_preview(alpha=200)
+    sleep(5)
     camera.capture(image_path)
+    camera.stop_preview()
 
-    # Capture image after barcode is scanned
-    keyboard.add_hotkey('ctrl+alt+s', capture_image)
-
-    # Keep the script running
-    keyboard.wait('esc')
-
-# Run the script
 capture_image()
